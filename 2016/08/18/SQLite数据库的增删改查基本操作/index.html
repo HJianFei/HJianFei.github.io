@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>SQLite数据库的增删改查基本操作 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">SQLite数据库的增删改查基本操作</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">SQLite数据库的增删改查基本操作</h1><div class="post-meta">Aug 18, 2016</div><div class="post-content"><h2 id="SQLite概述"><a href="#SQLite概述" class="headerlink" title="SQLite概述"></a>SQLite概述</h2><p>SQLite是Android系统的核心数据存储服务之一，它是一个轻型的嵌入式数据库，占用非常少的资源却能提供很好很快的数据存取服务，许多大型的需要数据存储的Android项目都有用到SQLite。<br><a id="more"></a></p>
+<h2 id="基本操作API简介"><a href="#基本操作API简介" class="headerlink" title="基本操作API简介"></a>基本操作API简介</h2><p>在Android中，SQLiteDatabase类提供了SQLite的底层API，但在使用SQLite数据库时，我们往往不会直接操作SQLiteDatabase这个类，而是自己创建一个继承自SQLitOpenHelper的子类来实现数据库操作。这样做的目的一是为了以后如果数据库升级不至于要改动太多代码，已实现封装；二则是为了我们使用更方便。</p>
+<h2 id="创建数据库和表"><a href="#创建数据库和表" class="headerlink" title="创建数据库和表"></a>创建数据库和表</h2><p>SQLiteOpenHelper是一个抽象类，在这个类里有两个抽象方法，OnCreate和OnUpgrade，前者用于第一次创建数据库，后者用于数据库升级，创建类DBServices如下：</p>
+<pre><code>public class DBServices extends SQLiteOpenHelper{
+
+    final static int version = 1;
+    final static String dbName = &quot;plan&quot;;
+
+    public DBServices(Context context){
+        super(context,dbName,null,version);
+    }
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // TODO Auto-generated method stub
+        //创建今日计划表
+        String create_today_plan_sql = &quot;CREATE TABLE _today_plan (&quot;
+                + &quot;_Date varchar(10) not null,&quot; 
+                + &quot;Item varchar(200),&quot;
+                + &quot;Check varchar(5) )&quot;;
+        db.execSQL(create_today_plan_sql);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)     {
+        // TODO Auto-generated method stub
+    }
+}
+</code></pre><p>示例里定义两个变量，一个是数据库的版本号，一个是数据库名。当Android应用运行时，SQLiteOpenHelper会先检查是否已经存在数据库，如果不存在，就创建数据库，然后打开数据库，最后调用OnCreate方法，所以我们需要再OnCreate中创建表（视图等）；如果数据库已存在，而版本号比上次创建的数据库版本号高，就调用OnUpgrade，用于升级。</p>
+<h2 id="数据的增——insert"><a href="#数据的增——insert" class="headerlink" title="数据的增——insert"></a>数据的增——insert</h2><p>创建了数据库和表之后，我们就可以给数据库和表添加数据了。<br>添加数据的操作和其他数据库一样，也是使用insert，只是SQLite的insert是函数，而且使用起来非常方便，下面是方法：</p>
+<pre><code>public void insert(String table, String nullColumnHack, ContentValues values)    {
+
+           SQLiteDatabase db = this.getWritableDatabase();
+        db.insert(table, nullColumnHack, values);
+    }
+</code></pre><p>参数说明：</p>
+<ul>
+<li><strong>table</strong>：表名，直接使用字符串指定； </li>
+<li><strong>nullColumnHack</strong>：指定null值的列，SQLite里不允许空行，使用这个参数可以指定一个列的值为null，当存入行为空时，这个列的值就被指定为null；</li>
+<li><strong>values</strong>：使用类似map键值对映射的数据结构ContentValues来指定插入的数据</li>
+</ul>
+<p><strong>添加数据示例</strong>：</p>
+<pre><code>String[] args = {
+                today,
+                content,
+                Boolean.toString(checked)
+        };
+        String[] column = {
+                &quot;_Date&quot;,
+                &quot;Item&quot;,
+                &quot;Check&quot;
+        };
+        //数据库中添加数据
+        ContentValues c = new ContentValues();
+        for(int i=0;i&lt;args.length;i++){
+            c.put(column[i], args[i]);
+        }
+        dbServices.insert(&quot;_today_plan&quot;, null, c);
+</code></pre><h2 id="数据的删——delete"><a href="#数据的删——delete" class="headerlink" title="数据的删——delete"></a>数据的删——delete</h2><p>删除和添加一样，也是通过传入参数调用方法来实现，方法：</p>
+<pre><code>public void delete(String table , String whereClause , String[] whereArgs){
+
+    SQLiteDatabase db = this.getWritableDatabase();
+    db.delete(table, whereClause, whereArgs);
+    Log.d(&quot;Delete&quot;,whereClause);
+}
+</code></pre><p>参数说明： </p>
+<ul>
+<li><strong>table</strong>：表名； </li>
+<li><strong>whereClause</strong>：可选，指定删除条件，相当于SQL语句WHERE语句之后的类容，可通过？来指定参数； </li>
+<li><strong>whereArgs</strong>：当whereClause指定了？参数，这个字符串数组里就是？所代表的参数，个数应与？数一致；</li>
+</ul>
+<p><strong>删除数据示例：</strong></p>
+<pre><code>String args[] ={ today,content, Boolean.toString(checked)};
+
+dbServices.delete(&quot;_today_plan&quot;, &quot;_Date=? and Item=? and [Check]=?&quot;,args);
+</code></pre><h2 id="数据的修改——update"><a href="#数据的修改——update" class="headerlink" title="数据的修改——update"></a>数据的修改——update</h2><p>修改与添加、删除相差不多，下面是update方法：</p>
+<pre><code>public void update(String table, ContentValues values,
+    String whereClause, String[] whereArgs){
+    SQLiteDatabase db = this.getWritableDatabase();
+    db.update(table, values, whereClause, whereArgs);
+}
+</code></pre><p>参数说明： </p>
+<ul>
+<li><strong>table</strong>：表名； </li>
+<li><strong>values</strong>：同上，是需要修改的列和值的映射集合； </li>
+<li><strong>whereClause</strong>：修改的行所需符合的条件； </li>
+<li><strong>whereArgs</strong>：指定条件里的参数；</li>
+</ul>
+<p><strong>修改数据示例：</strong></p>
+<pre><code>String args[] ={
+    today,
+    content,
+    Boolean.toString(!m)
+};
+ContentValues c = new ContentValues();
+c.put(&quot;[Check]&quot;, Boolean.toString(m));
+dbServices.update(&quot;_today_plan&quot;, c,&quot;_Date=? and StartTime=? and Item=? and Check=?&quot;,args);
+</code></pre><h2 id="数据的查询——read"><a href="#数据的查询——read" class="headerlink" title="数据的查询——read"></a>数据的查询——read</h2><p>在这里就和前面有所不同了，读取数据所用的方法是直接执行查询语句，获取游标，然后通过游标来遍历数据库，方法如下：</p>
+<pre><code>public Cursor read(String sql ,String[] args){
+    SQLiteDatabase db = this.getReadableDatabase();
+    Cursor cursor = db.rawQuery(sql, args);
+    Log.d(&quot;Database&quot;,cursor.getColumnName(0));
+    return cursor;
+}
+</code></pre><p>方法说明： </p>
+<p>请注意：在这里db获取的是只读的数据库（getReadableDatabase），而在上述三种操作里都是使用的可写数据库（getWritableDatabase）；至于游标的用法此处就不再赘述，只需看一下API的名字就能掌握基本用法，但最后一定要记得将游标关闭（close）！</p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>附录了DBServices类，仅作参考</p>
+<pre><code>public class DBServices extends SQLiteOpenHelper{
+
+    final static int version = 1;
+    final static String dbName = &quot;plan&quot;;
+
+    public DBServices(Context context){
+        super(context,dbName,null,version);
+    }
+
+       @Override
+    public void onCreate(SQLiteDatabase db) {
+        // TODO Auto-generated method stub
+        //创建今日计划表
+        String create_today_plan_sql = &quot;CREATE TABLE [_today_plan] (&quot;
+                + &quot;[_Date] varchar(10) not null,&quot; 
+                + &quot;[Item] varchar(200),&quot;
+                + &quot;[Check] varchar(5) )&quot;;
+        db.execSQL(create_today_plan_sql);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Cursor read(String sql ,String[] args){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(sql, args);
+        Log.d(&quot;Database&quot;,cursor.getColumnName(0));
+        return cursor;
+    }
+
+    public void insert(String table, String nullColumnHack, ContentValues values){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert(table, nullColumnHack, values);
+    }
+
+    public void delete(String table , String whereClause , String[] whereArgs){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(table, whereClause, whereArgs);
+        Log.d(&quot;Delete&quot;,whereClause);
+    }
+
+    public void update(String table, ContentValues values,
+        String whereClause, String[] whereArgs){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.update(table, values, whereClause, whereArgs);
+    }
+
+}
+</code></pre><p>有关SQLite的高级特性，如索引、视图以及触发器等，大家可以去看看SQlite的官方文档。</p>
+<p>上述类在手机重启时，数据库会重新创建，原因是数据库没有关闭（但因为要提供游标，所以控制起来会比较困难），所以这里提出一个解决办法，就是数据库的操作（建表、增、删、改）均使用事务方式，示例如下：</p>
+<pre><code>db.beginTransaction();          //事务开始
+//建表、增、删、改、查
+db.setTransactionSuccessful();      //事务成功
+db.endTransaction();                //提交事务
+</code></pre></div><div class="tags"><a href="/tags/SQLite、数据库/">SQLite、数据库</a></div><div class="post-nav"><a href="/2016/09/15/REST-架构遵循了-CRUD-原则/" class="pre">REST 架构遵循了 CRUD 原则</a><a href="/2016/08/04/AsyncTask的使用/" class="next">AsyncTask的使用</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

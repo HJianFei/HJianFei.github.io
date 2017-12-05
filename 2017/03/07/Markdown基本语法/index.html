@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Markdown基本语法 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Markdown基本语法</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Markdown基本语法</h1><div class="post-meta">Mar 7, 2017</div><div class="post-content"><h1 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h1><p>Markdown 支持两种标题的语法，类 Setext 和类 atx 形式。</p>
+<p>类 Setext 形式是用底线的形式，利用 = （最高阶标题）和 - （第二阶标题），例如：</p>
+<pre><code>This is an H1  
+============= 
+This is an H2 
+-------------- 
+</code></pre><p>如图所示：<br><a id="more"></a><br><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/title_1.png" alt="title_1"> </p>
+<p>任何数量的 = 和 - 都可以有效果。</p>
+<p>类 Atx 形式则是在行首插入 1 到 6 个 # ，对应到标题 1 到 6 阶，例如：</p>
+<pre><code>#这是H1#
+##这是H2##
+######这是H6######
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/title_2.png" alt="title_2"></p>
+<p>你可以选择性地「闭合」类 atx 样式的标题，这纯粹只是美观用的，若是觉得这样看起来比较舒适，你就可以在行尾加上 #，而行尾的 # 数量也不用和开头一样（行首的井字符数量决定标题的阶数）：</p>
+<pre><code># 这是 H1 #
+## 这是 H2 ##
+### 这是 H3 ######
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/title_3.png" alt="title_3"></p>
+<h1 id="区块引用-Blockquotes"><a href="#区块引用-Blockquotes" class="headerlink" title="区块引用 Blockquotes"></a>区块引用 Blockquotes</h1><p>Markdown 标记区块引用是使用类似 email 中用 &gt; 的引用方式。如果你还熟悉在 email 信件中的引言部分，你就知道怎么在 Markdown 文件中建立一个区块引用，那会看起来像是你自己先断好行，然后在每行的最前面加上 &gt; ：</p>
+<pre><code>&gt;这是一个区块，
+&gt;这是一个区块。
+&gt;这是一个区块。
+&gt;
+&gt;这是一个区块
+&gt;这是一个区块。
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/blockquote_1.png" alt="blockquote_1"></p>
+<p>Markdown 也允许你偷懒只在整个段落的第一行最前面加上 &gt; ：</p>
+<pre><code>&gt;这是一个区块，这是一个区块，这是一个区块，这是一个区块，
+这是一个区块，这是一个区块，这是一个区块
+&gt; 这是一个区块，这是一个区块，这是一个区块，这是一个区块，这是一个区块，这是一个区块，这是一个区块
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/blockquote_2.png" alt="blockquote_2"></p>
+<p>区块引用可以嵌套（例如：引用内的引用），只要根据层次加上不同数量的 &gt; ：</p>
+<pre><code>&gt; 这是一个区块
+&gt;
+&gt; &gt; 这是一个区块
+&gt;
+&gt; 这是一个区块
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/blockquote_3.png" alt="blockquote_3"></p>
+<p>引用的区块内也可以使用其他的 Markdown 语法，包括标题、列表、代码区块等：</p>
+<pre><code>&gt; ## 这是一个标题。
+&gt; 
+&gt; 1.   这是第一行列表项。
+&gt; 2.   这是第二行列表项。
+&gt; 
+&gt; 给出一些例子代码：
+&gt; 
+&gt;     System.out.println(&quot;Hello Markdown&quot;);
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/blockquote_4.png" alt="blockquote_4"></p>
+<p>任何像样的文本编辑器都能轻松地建立 email 型的引用。例如在 BBEdit 中，你可以选取文字后然后从选单中选择增加引用阶层。</p>
+<h1 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h1><p>Markdown 支持有序列表和无序列表。</p>
+<p>无序列表使用星号、加号或是减号作为列表标记：</p>
+<pre><code>*   红色
+*   蓝色
+*   黑色
+*   白色
+</code></pre><p>等同于：</p>
+<pre><code>+   红色
++   蓝色
++   黑色
++   白色
+</code></pre><p>也等同于：</p>
+<pre><code>-   红色
+-   蓝色
+-   黑色
+-   白色
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/list_1.png" alt="list_1"></p>
+<p>有序列表则使用数字接着一个英文句点：</p>
+<pre><code>1.  红色
+2.  蓝色
+3.  绿色
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/list_2.png" alt="list_2"></p>
+<h1 id="代码区块"><a href="#代码区块" class="headerlink" title="代码区块"></a>代码区块</h1><p>和程序相关的写作或是标签语言原始码通常会有已经排版好的代码区块，通常这些区块我们并不希望它以一般段落文件的方式去排版，而是照原来的样子显示，Markdown 会用  <code>&lt;pre&gt;</code> 和 <code>&lt;code&gt;</code> 标签来把代码区块包起来。</p>
+<p>要在 Markdown 中建立代码区块很简单，只要简单地缩进 4 个空格或是 1 个制表符就可以，例如，下面的输入：</p>
+<pre><code>这是一个普通段落：
+
+    这是一个代码区块。
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/code_1.png" alt="code_1"></p>
+<h1 id="分隔线"><a href="#分隔线" class="headerlink" title="分隔线"></a>分隔线</h1><p>你可以在一行中用三个以上的星号、减号、底线来建立一个分隔线，行内不能有其他东西。你也可以在星号或是减号中间插入空格。下面每种写法都可以建立分隔线。</p>
+<pre><code>* * *
+
+***
+
+*****
+
+- - -
+
+---------------------------------------
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/fengefu.png" alt="fengefu"></p>
+<h1 id="区段元素"><a href="#区段元素" class="headerlink" title="区段元素"></a>区段元素</h1><h2 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h2><p>Markdown 支持两种形式的链接语法： 行内式和参考式两种形式。</p>
+<p>不管是哪一种，链接文字都是用 [方括号] 来标记。</p>
+<p>要建立一个行内式的链接，只要在方块括号后面紧接着圆括号并插入网址链接即可，如果你还想要加上链接的 title 文字，只要在网址后面，用双引号把 title 文字包起来即可，例如：</p>
+<pre><code>这是一个 [链接](http://hjianfei.github.io &quot;HJianFei的博客&quot;) 行内链接.
+
+[链接](http://hjianfei.github.io) 没有标题参数。
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/link_1.png" alt="link_1"></p>
+<h2 id="强调"><a href="#强调" class="headerlink" title="强调"></a>强调</h2><p>Markdown 使用星号（<code>*</code>）和底线（<code>_</code>）作为标记强调字词的符号，被 <em> 或 _ 包围的字词会被转成用 <code>&lt;em&gt;</code> 标签包围，用两个 `</em><code>或</code>_<code>包起来的话，则会被转成</code><strong>`，例如：</strong></p>
+<pre><code>*单个星号*
+
+_单下划线_
+
+__双下划线__  
+
+**两个星号**
+</code></pre><p>如图所示:</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/qiangdiao_1.png" alt="强调"></p>
+<p>但是如果你的 * 和 _ 两边都有空白的话，它们就只会被当成普通的符号。</p>
+<p>如果要在文字前后直接插入普通的星号或底线，你可以用反斜线：</p>
+<pre><code>\*this text is surrounded by literal asterisks\*
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/qiangdiao_2.png" alt="强调_2"></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>如果要标记一小段行内代码，你可以用反引号把它包起来（`），例如：</p>
+<pre><code>Use the `printf()` function.
+</code></pre><p>如果要在代码区段内插入反引号，你可以用多个反引号来开启和结束代码区段：</p>
+<pre><code>``There is a literal backtick (`) here.``
+</code></pre><p>代码区段的起始和结束端都可以放入一个空白，起始端后面一个，结束端前面一个，这样你就可以在区段的一开始就插入反引号：</p>
+<pre><code>A single backtick in a code span: `` ` ``
+
+A backtick-delimited string in a code span: `` `foo` ``
+</code></pre><h2 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h2><p>很明显地，要在纯文字应用中设计一个「自然」的语法来插入图片是有一定难度的。</p>
+<p>Markdown 使用一种和链接很相似的语法来标记图片，同样也允许两种样式： 行内式和参考式。</p>
+<p>行内式的图片语法看起来像是：</p>
+<pre><code>![提示文字](../img_src/img.png)
+![提示文字](../img_src/img.png &quot;可选标题&quot;)
+</code></pre><p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/img.png" alt="img"></p>
+<h1 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h1><h2 id="自动链接"><a href="#自动链接" class="headerlink" title="自动链接"></a>自动链接</h2><p>Markdown 支持以比较简短的自动链接形式来处理网址和电子邮件信箱，只要是用尖括号包起来， Markdown 就会自动把它转成链接。一般网址的链接文字就和链接地址一样，例如：</p>
+<p><a href="http://hjianfei.github.io/" target="_blank" rel="noopener">http://hjianfei.github.io/</a></p>
+<p>如图所示：</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/img_src/link.png" alt="link"></p>
+<h2 id="反斜杠"><a href="#反斜杠" class="headerlink" title="反斜杠"></a>反斜杠</h2><p>Markdown 可以利用反斜杠来插入一些在语法中有其它意义的符号，例如：如果你想要用星号加在文字旁边的方式来做出强调效果（但不用 <code>&lt;em&gt;</code> 标签），你可以在星号的前面加上反斜杠：</p>
+<pre><code>\*literal asterisks\*
+</code></pre><p>Markdown 支持以下这些符号前面加上反斜杠来帮助插入普通的符号：</p>
+<pre><code>\   反斜线
+`   反引号
+*   星号
+_   底线
+{}  花括号
+[]  方括号
+()  括弧
+#   井字号
++   加号
+-   减号
+.   英文句点
+!   惊叹号
+</code></pre></div><div class="tags"></div><div class="post-nav"><a href="/2017/03/13/Git基本命令整理/" class="pre">Git基本命令整理</a><a href="/2017/03/03/EventBus 3.0 的基本使用/" class="next">EventBus 3.0 的基本使用</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

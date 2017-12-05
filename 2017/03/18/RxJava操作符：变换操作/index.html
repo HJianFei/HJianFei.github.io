@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>RxJava操作符：变换操作 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">RxJava操作符：变换操作</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">RxJava操作符：变换操作</h1><div class="post-meta">Mar 18, 2017</div><div class="post-content"><h1 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h1><h2 id="——对Observable发射的每一项数据应用一个函数，执行变换操作"><a href="#——对Observable发射的每一项数据应用一个函数，执行变换操作" class="headerlink" title="——对Observable发射的每一项数据应用一个函数，执行变换操作"></a>——对Observable发射的每一项数据应用一个函数，执行变换操作</h2><p>Map操作符对原始Observable发射的每一项数据应用一个你选择的函数，然后返回一个发射这些结果的Observable。<br><a id="more"></a><br>RxJava将这个操作符实现为map函数。这个操作符默认不在任何特定的调度器上执行。<br><img src="http://okzvc1hu4.bkt.clouddn.com/map.png" alt="Map操作符"></p>
+<p>代码：</p>
+<pre><code>Observable
+.from(filePathStrS)// String[] filePathStrS :本地图片路径数组 
+.map(new Func1&lt;String, Bitmap&gt;() {
+    @Override
+    public Bitmap call(String s) {
+        return Utils.getBitmapFromFile(photoPath + s);//通过map将String变换成Bitmap
+    }
+})
+.filter(new Func1&lt;Bitmap, Boolean&gt;() {
+    @Override
+    public Boolean call(Bitmap bitmap) {
+        return bitmap != null;//筛选掉空文件
+    }
+})
+.subscribeOn(Schedulers.io())
+.observeOn(AndroidSchedulers.mainThread())
+.subscribe(new Action1&lt;Bitmap&gt;() {
+    @Override
+    public void call(Bitmap bitmap) {//主线程显示数据
+        questionBitmapList.set(questionInPicCount, bitmap);
+        QuestionShowAdapter.notifyDataSetChanged();
+
+    }
+}, new Action1&lt;Throwable&gt;() {
+    @Override
+    public void call(Throwable throwable) {
+        throwable.printStackTrace();
+    }
+}, new Action0() {
+    @Override
+    public void call() {
+    }
+});
+</code></pre><h1 id="FlatMap"><a href="#FlatMap" class="headerlink" title="FlatMap"></a>FlatMap</h1><h2 id="——FlatMap将一个发射数据的Observable变换为多个Observables，然后将它们发射的数据合并后放进一个单独的Observable"><a href="#——FlatMap将一个发射数据的Observable变换为多个Observables，然后将它们发射的数据合并后放进一个单独的Observable" class="headerlink" title="——FlatMap将一个发射数据的Observable变换为多个Observables，然后将它们发射的数据合并后放进一个单独的Observable"></a>——FlatMap将一个发射数据的Observable变换为多个Observables，然后将它们发射的数据合并后放进一个单独的Observable</h2><p>FlatMap操作符使用一个指定的函数对原始Observable发射的每一项数据执行变换操作，这个函数返回一个本身也发射数据的Observable，然后FlatMap合并这些Observables发射的数据，最后将合并后的结果当做它自己的数据序列发射。</p>
+<p>这个方法是很有用的，例如，当你有一个这样的Observable：它发射一个数据序列，这些数据本身包含Observable成员或者可以变换为Observable，因此你可以创建一个新的Observable发射这些次级Observable发射的数据的完整集合。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/flatMap.png" alt="FlatMap操作符"></p>
+<p>代码：</p>
+<pre><code> private Observable&lt;String&gt; processUrlIpByOneFlatMap() {
+    return Observable.just(
+            &quot;http://www.baidu.com/&quot;,
+            &quot;http://www.google.com/&quot;,
+            &quot;https://www.bing.com/&quot;)
+            .flatMap(new Func1&lt;String, Observable&lt;String&gt;&gt;() {
+                @Override
+                public Observable&lt;String&gt; call(String s) {
+                    return createIpObservable(s);
+                }
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1&lt;String&gt;() {
+                @Override
+                public void call(String s) {
+                    printLog(tvLogs, &quot;Consume Data &lt;- &quot;, s);
+                }
+            }, new Action1&lt;Throwable&gt;() {
+                @Override
+                public void call(Throwable throwable) {
+                    printErrorLog(tvLogs, &quot;throwable call()&quot;, throwable.getMessage());
+                }
+            });
+}
+
+//根据主机获取ip
+private Observable&lt;String&gt; createIpObservable(final String url) {
+    return Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
+        @Override
+        public void call(Subscriber&lt;? super String&gt; subscriber) {
+            try {
+                String ip = getIPByUrl(url);
+                subscriber.onNext(ip);
+                printLog(tvLogs, &quot;Emit Data -&gt; &quot;,url+&quot; : &quot; +ip);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                //subscriber.onError(e);
+                subscriber.onNext(null);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+                //subscriber.onError(e);
+                subscriber.onNext(null);
+            }
+            subscriber.onCompleted();
+        }
+    });
+}
+</code></pre><p>结果：</p>
+<pre><code>Emit Data -&gt; &apos;http://www.baidu.com/ : 115.239.211.112&apos;
+Main Thread:false, Thread Name:RxCachedThreadScheduler-1
+Consume Data &lt;- &apos;115.239.211.112&apos;
+Main Thread:true, Thread Name:main
+
+Emit Data -&gt; &apos;http://www.google.com/ : 216.58.199.100&apos;
+Main Thread:false, Thread Name:RxCachedThreadScheduler-1
+Consume Data &lt;- &apos;216.58.199.100&apos;
+Main Thread:true, Thread Name:main
+
+Emit Data -&gt; &apos;https://www.bing.com/ : 202.89.233.104&apos;
+Main Thread:false, Thread Name:RxCachedThreadScheduler-1
+Consume Data &lt;- &apos;202.89.233.104&apos;
+Main Thread:true, Thread Name:main
+</code></pre><h1 id="GroupBy"><a href="#GroupBy" class="headerlink" title="GroupBy"></a>GroupBy</h1><h2 id="将一个Observable分拆为一些Observables集合，它们中的每一个发射原始Observable的一个子序列。"><a href="#将一个Observable分拆为一些Observables集合，它们中的每一个发射原始Observable的一个子序列。" class="headerlink" title="将一个Observable分拆为一些Observables集合，它们中的每一个发射原始Observable的一个子序列。"></a>将一个Observable分拆为一些Observables集合，它们中的每一个发射原始Observable的一个子序列。</h2><p>GroupBy操作符将原始Observable分拆为一些Observables集合，它们中的每一个发射原始Observable数据序列的一个子序列。哪个数据项由哪一个Observable发射是由一个函数判定的，这个函数给每一项指定一个Key，Key相同的数据会被同一个Observable发射。</p>
+<p>RxJava实现了groupBy操作符。它返回Observable的一个特殊子类GroupedObservable，实现了GroupedObservable接口的对象有一个额外的方法getKey，这个Key用于将数据分组到指定的Observable。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/groupBy.png" alt="GroupBy操作符"></p>
+<pre><code>Observable.range(1, 8).groupBy(new Func1&lt;Integer, String&gt;() {  
+        @Override  
+        public String call(Integer integer) {  
+            return (integer % 2 == 0) ? &quot;偶数组&quot; : &quot;奇数组&quot;;  
+        }  
+    }).subscribe(new Action1&lt;GroupedObservable&lt;String, Integer&gt;&gt;() {  
+        @Override  
+        public void call(final GroupedObservable&lt;String, Integer&gt; stringIntegerGroupedObservable) {  
+            System.out.println(&quot;group name:&quot; + stringIntegerGroupedObservable.getKey());  
+            if (stringIntegerGroupedObservable.getKey().equalsIgnoreCase(&quot;奇数组&quot;))  
+                stringIntegerGroupedObservable.subscribe(new Action1&lt;Integer&gt;() {  
+                    @Override  
+                    public void call(Integer integer) {  
+                        System.out.println(stringIntegerGroupedObservable.getKey() + &quot;&apos;member: &quot; + integer);  
+                    }  
+                });  
+        }  
+    }); 
+</code></pre><p>结果：</p>
+<pre><code>group name:奇数组
+奇数组&apos;member: 1
+group name:偶数组
+奇数组&apos;member: 3
+奇数组&apos;member: 5
+奇数组&apos;member: 7
+</code></pre><h1 id="Scan"><a href="#Scan" class="headerlink" title="Scan"></a>Scan</h1><h2 id="连续地对数据序列的每一项应用一个函数，然后连续发射结果"><a href="#连续地对数据序列的每一项应用一个函数，然后连续发射结果" class="headerlink" title="连续地对数据序列的每一项应用一个函数，然后连续发射结果"></a>连续地对数据序列的每一项应用一个函数，然后连续发射结果</h2><p>Scan操作符对原始Observable发射的第一项数据应用一个函数，然后将那个函数的结果作为自己的第一项数据发射。它将函数的结果同第二项数据一起填充给这个函数来产生它自己的第二项数据。它持续进行这个过程来产生剩余的数据序列。这个操作符在某些情况下被叫做accumulator。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/scan.png" alt="Scan"></p>
+<p>代码：</p>
+<pre><code>Observable.just(1, 2, 3, 4, 5)
+.scan(new Func2&lt;Integer, Integer, Integer&gt;() {
+    @Override
+    public Integer call(Integer sum, Integer item) {
+        return sum + item;
+    }
+}).subscribe(new Subscriber&lt;Integer&gt;() {
+    @Override
+    public void onNext(Integer item) {
+        System.out.println(&quot;Next: &quot; + item);
+    }
+
+    @Override
+    public void onError(Throwable error) {
+        System.err.println(&quot;Error: &quot; + error.getMessage());
+    }
+
+    @Override
+    public void onCompleted() {
+        System.out.println(&quot;Sequence complete.&quot;);
+    }
+});
+</code></pre><p>结果：</p>
+<pre><code>Next: 1
+Next: 3
+Next: 6
+Next: 10
+Next: 15
+Sequence complete.
+</code></pre><p>更多操作符请查看<a href="https://github.com/ReactiveX/RxJava/wiki" target="_blank" rel="noopener">RxJava官方文档</a></p>
+</div><div class="tags"></div><div class="post-nav"><a href="/2017/05/03/Android常用工具类/" class="pre">Android常用工具类</a><a href="/2017/03/17/RxJava操作符：创建操作/" class="next">RxJava操作符：创建操作</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>AsyncTask的使用 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">AsyncTask的使用</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">AsyncTask的使用</h1><div class="post-meta">Aug 4, 2016</div><div class="post-content"><h2 id="AsyncTask类有三个泛型参数，这三个参数的用途如下："><a href="#AsyncTask类有三个泛型参数，这三个参数的用途如下：" class="headerlink" title="AsyncTask类有三个泛型参数，这三个参数的用途如下： "></a>AsyncTask类有三个泛型参数，这三个参数的用途如下： </h2><ul>
+<li><strong>Params:</strong><br>  在执行AsyncTask时需要传入的参数，可用于在后台任务中使用。</li>
+<li><strong>Progress:</strong><br>  后台任务执行时，如果需要在界面上显示当前的进度，则使用这里指定的泛型作为进度单位。</li>
+<li><strong>Result:</strong><br>  当任务执行完毕后，如果需要对结果进行返回，则使用这里指定的泛型作为返回值类型。<a id="more"></a>
+AsyncTask中的几个方法才能完成对任务的定制。经常需要去重写的方法有以下四个：</li>
+</ul>
+<hr>
+<ul>
+<li><p><strong>onPreExecute:</strong><br>这个方法会在后台任务开始执行之间调用，用于进行一些界面上的初始化操作，比如显示一个进度条对话框等。</p>
+</li>
+<li><p><strong>doInBackground(Params…):</strong>  这个方法中的所有代码都会在子线程中运行，我们应该在这里去处理所有的耗时任务。任务一旦完成就可以通过return语句来将任务的执行结果进行返回，如果AsyncTask的第三个泛型参数指定的是Void，就可以不返回任务执行结果。注意，在这个方法中是不可以进行UI操作的，如果需要更新UI元素，比如说反馈当前任务的执行进度，可以调用publishProgress(Progress…)方法来完成。 </p>
+</li>
+<li><p><strong>onProgressUpdate(Progress…):</strong>  当在后台任务中调用了publishProgress(Progress…)方法后，这个方法就很快会被调用，方法中携带的参数就是在后台任务中传递过来的。在这个方法中可以对UI进行操作，利用参数中的数值就可以对界面元素进行相应的更新。 </p>
+</li>
+<li><p><strong>onPostExecute(Result):</strong>  当后台任务执行完毕并通过return语句进行返回时，这个方法就很快会被调用。返回的数据会作为参数传递到此方法中，可以利用返回的数据来进行一些UI操作，比如说提醒任务执行的结果，以及关闭掉进度条对话框等。</p>
+</li>
+</ul>
+<h2 id="代码如下："><a href="#代码如下：" class="headerlink" title="代码如下："></a>代码如下：</h2><pre><code>// 异步任务
+private class MyAsyncTask extends android.os.AsyncTask&lt;Void, Integer, Void&gt; {
+    @Override
+    protected void onPreExecute() {
+        // TODO Auto-generated method stub
+        super.onPreExecute();
+        mDialog.show();
+    }
+    @Override
+    protected Void doInBackground(Void... params) {
+        // TODO Auto-generated method stub
+        for (int i = 0; i &lt; 100; i++) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            // //进度条每次更新i,执行中创建新线程处理onProgressUpdate()
+            publishProgress(i);
+        }
+        return null;
+    }
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        // TODO Auto-generated method stub
+        super.onProgressUpdate(values);
+        mDialog.setProgress(values[0]);// 每次更新进度条
+    }
+    @Override
+    protected void onPostExecute(Void result) {
+        // TODO Auto-generated method stub
+        super.onPostExecute(result);
+        // 进行数据加载完成后的UI操作
+        mDialog.dismiss();
+        mTextView.setText(&quot;加载完成&quot;);
+    }
+}
+</code></pre></div><div class="tags"></div><div class="post-nav"><a href="/2016/08/18/SQLite数据库的增删改查基本操作/" class="pre">SQLite数据库的增删改查基本操作</a><a href="/2016/07/19/Activity的四种启动模式/" class="next">Activity的四种启动模式</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

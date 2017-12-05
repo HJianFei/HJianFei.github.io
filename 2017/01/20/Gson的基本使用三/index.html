@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Gson的基本使用三 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Gson的基本使用三</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Gson的基本使用三</h1><div class="post-meta">Jan 20, 2017</div><div class="post-content"><h2 id="字段过滤的几种方法"><a href="#字段过滤的几种方法" class="headerlink" title="字段过滤的几种方法"></a>字段过滤的几种方法</h2><p>字段过滤Gson中比较常用的技巧，特别是在Android中，在处理业务逻辑时可能需要在设置的<br>POJO中加入一些字段，但显然在序列化的过程中是不需要的，并且如果序列化还可能带来一个问<br>题就是 循环引用 ，那么在用Gson序列化之前为不防止这样的事件情发生，你不得不作另外的处<br>理。<br><a id="more"></a><br>以一个商品分类Category 为例。</p>
+<pre><code>{
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;电脑&quot;,
+   &quot;children&quot;: [
+     {
+       &quot;id&quot;: 100,
+       &quot;name&quot;: &quot;笔记本&quot;
+     },
+     {
+        &quot;id&quot;: 101,
+        &quot;name&quot;: &quot;台式机&quot;
+      }
+    ]
+ }
+</code></pre><p>一个大分类，可以有很多小分类，那么显然我们在设计Category类时Category本身既可以是大分<br>类，也可以是小分类。</p>
+<pre><code>public class Category {
+      public int id;
+      public String name;
+      public List&lt;Category&gt; children;    
+}
+</code></pre><p>但是为了处理业务，我们还需要在子分类中保存父分类，最终会变成下面的情况.</p>
+<pre><code>public class Category {
+      public int id;
+      public String name;
+      public List&lt;Category&gt; children;
+      //因业务需要增加，但并不需要序列化
+      public Category parent;
+  }
+</code></pre><p>但是上面的parent字段是因业务需要增加的，那么在序列化是并不需要，所以在序列化时就必须<br>将其排除，那么在Gson中如何排除符合条件的字段呢?下面提供4种方法，大家可根据需要自行选<br>择合适的方式。</p>
+<p><strong>基于<code>@Expose</code>注解</strong></p>
+<p><code>@Expose</code>提供了两个属性，且都有默认值，开发者可以根据需要设置不同的值。</p>
+<p><code>@Expose</code> 注解从名字上就可以看出是暴露的意思，所以该注解是用于对处暴露字段的。可是我们<br>以前用Gson的时候也没有<code>@Expose</code> 注解还是不正确的序列化为JSON了么?是的，所以该注解在<br>使用<code>new Gson()</code> 时是不会发生作用。毕竟最常用的API要最简单，所以该注解必须和<code>GsonBuilder</code>配合使用。</p>
+<p>使用方法： 简单说来就是需要导出的字段上加上<code>@Expose</code> 注解，不导出的字段不加。注意是不导出的不加。</p>
+<pre><code>@Expose //
+@Expose(deserialize = true,serialize = true) //序列化和反序列化都都生效
+@Expose(deserialize = true,serialize = false) //反序列化时生效
+@Expose(deserialize = false,serialize = true) //序列化时生效
+@Expose(deserialize = false,serialize = false) // 和不写一样
+</code></pre><p>注：根据上面的图片可以得出，所有值为true的属性都是可以不写的。拿上面的例子来说就是:</p>
+<pre><code>public class Category {
+     @Expose public int id;
+     @Expose public String name;
+     @Expose public List&lt;Category&gt; children;
+     //不需要序列化,所以不加 @Expose 注解，
+     //等价于 @Expose(deserialize = false,serialize = false)
+     public Category parent;
+}
+</code></pre><p>在使用Gson时也不能只是简单的<code>new Gson()</code>了。</p>
+<pre><code>Gson gson = new GsonBuilder()
+          .excludeFieldsWithoutExposeAnnotation()
+          .create();
+gson.toJson(category);
+</code></pre><p><strong>基于版本</strong></p>
+<p>Gson在对基于版本的字段导出提供了两个注解 <code>@Since</code> 和 <code>@Until</code>,和<code>GsonBuilder.setVersion(Double)</code>配合使用。<code>@Since</code> 和 <code>@Until</code>都接收一个<code>Double</code>值。</p>
+<p><code>Since</code>和<code>Until</code>注解<br>使用方法：当前版本(<code>GsonBuilder</code>中设置的版本) 大于等于<code>Since</code>的值时该字段导出，小<code>Until</code>的值时该该字段导出。</p>
+<pre><code>class SinceUntilSample {
+     @Since(4)
+     public String since;
+     @Until(5)
+     public String until;
+ }
+
+ public void sineUtilTest(double version){
+         SinceUntilSample sinceUntilSample = new SinceUntilSample();
+          sinceUntilSample.since = &quot;since&quot;;
+          sinceUntilSample.until = &quot;until&quot;;
+          Gson gson = new GsonBuilder().setVersion(version).create();
+          System.out.println(gson.toJson(sinceUntilSample));
+  }
+  //当version &lt;4时，结果：{&quot;until&quot;:&quot;until&quot;}
+  //当version &gt;=4 &amp;&amp; version &lt;5时，结果：{&quot;since&quot;:&quot;since&quot;,&quot;until&quot;:&quot;until&quot;}
+//当version &gt;=5时，结果：{&quot;since&quot;:&quot;since&quot;}
+</code></pre><p>注：当一个字段被同时注解时，需两者同时满足条件。</p>
+<p><strong>基于访问修饰符</strong></p>
+<p>什么是修饰符? <code>public</code>、<code>static</code> 、<code>final</code>、<code>private</code>、<code>protected</code>这些就是，所以这种方式也是比较特殊的。</p>
+<p>使用方式：</p>
+<pre><code>class ModifierSample {
+      final String finalField = &quot;final&quot;;
+      static String staticField = &quot;static&quot;;
+      public String publicField = &quot;public&quot;;
+      protected String protectedField = &quot;protected&quot;;
+      String defaultField = &quot;default&quot;;
+      private String privateField = &quot;private&quot;;
+}
+</code></pre><p>使用<code>GsonBuilder.excludeFieldsWithModifiers</code>构建gson,支持int形的可变参数，值<br>由<code>java.lang.reflect.Modifier</code>提供，下面的程序排除了<code>privateField</code> 、 <code>finalField</code> 和<br><code>staticField</code> 三个字段。</p>
+<pre><code>ModifierSample modifierSample = new ModifierSample();
+Gson gson = new GsonBuilder()
+          .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.STATIC, Modifier.PRIVATE
+          .create();
+</code></pre><p><strong>基于策略（自定义规则）</strong></p>
+<p>上面介绍的了3种排除字段的方法，说实话我除了@Expose以外，其它的都是只在Demo用上过，<br>用得最多的就是马上要介绍的自定义规则，好处是功能强大、灵活，缺点是相比其它3种方法稍麻<br>烦一点，但也仅仅只是想对其它3种稍麻烦一点而已。<br>基于策略是利用Gson提供的<code>ExclusionStrategy</code>接口，同样需要使用<code>GsonBuilder</code>,相关API 2<br>个，分别是<code>addSerializationExclusionStrategy</code>和<br><code>addDeserializationExclusionStrategy</code>分别针对序列化和反序化时。这里以序列化为例。<br>例如：</p>
+<pre><code>Gson gson = new GsonBuilder()
+          .addSerializationExclusionStrategy(new ExclusionStrategy() {
+              @Override
+              public boolean shouldSkipField(FieldAttributes f) {
+                  // 这里作判断，决定要不要排除该字段,return true为排除
+                   if (&quot;finalField&quot;.equals(f.getName())) return true; //按字段名排除
+                   Expose expose = f.getAnnotation(Expose.class);
+                   if (expose != null &amp;&amp; expose.deserialize() == false) return true; //按注解排除
+                 return false;
+             }
+             @Override
+             public boolean shouldSkipClass(Class&lt;?&gt; clazz) {
+                 // 直接排除某个类 ，return true为排除
+                 return (clazz == int.class || clazz == Integer.class);
+             }
+         })
+        .create();
+</code></pre><h2 id="POJO与JSON的字段映射规则"><a href="#POJO与JSON的字段映射规则" class="headerlink" title="POJO与JSON的字段映射规则"></a>POJO与JSON的字段映射规则</h2><p><code>GsonBuilde</code>提供了<code>FieldNamingStrategy</code>接口和<code>setFieldNamingPolicy</code>和<code>setFieldNamingStrategy</code> 两个方法。默认实现<code>GsonBuilder.setFieldNamingPolicy</code> 方法与Gson提供的另一个枚举类<code>FieldNamingPolicy</code>配合使用，该枚举类提供了5种实现方式分别为：</p>
+<table>
+<thead>
+<tr>
+<th>FieldNamingPolicy</th>
+<th>结果（仅输出emailAddress字段）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDENTITY</td>
+<td>{“emailAddress”:”HJianFei@example.com”}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_DASHES</td>
+<td>{“email­address”:”HJianFei@example.com”}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_UNDERSCORES</td>
+<td>{“email_address”:”HJianFei@example.com”}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE</td>
+<td>{“EmailAddress”:”HJianFei@example.com”}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE_WITH_SPACES</td>
+<td>{“Email Address”:”HJianFei@example.com”}</td>
+<td>]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>自定义实现</strong></p>
+<p><code>GsonBuilder.setFieldNamingStrategy</code> 方法需要与Gson提供的<code>FieldNamingStrategy</code>接口配合使用，用于实现将POJO的字段与JSON的字段相对应。上面的<code>FieldNamingPolicy</code>实际上也实现了<code>FieldNamingStrategy</code>接口，也就是<code>FieldNamingPolicy</code>也可以使用<code>setFieldNamingStrategy</code>方法。</p>
+<p>用法：</p>
+<pre><code>Gson gson = new GsonBuilder()
+          .setFieldNamingStrategy(new FieldNamingStrategy() {
+              @Override
+              public String translateName(Field f) {
+                  //实现自己的规则
+                  return null;
+              }
+          })
+          .create();
+</code></pre><p>注意： <code>@SerializedName</code>注解拥有最高优先级，在加有<code>@SerializedName</code>注解的字段<br>上<code>FieldNamingStrategy</code>不生效！</p>
+</div><div class="tags"><a href="/tags/gson、json、数据解析/">gson、json、数据解析</a></div><div class="post-nav"><a href="/2017/03/03/EventBus 3.0 的基本使用/" class="pre">EventBus 3.0 的基本使用</a><a href="/2017/01/18/TabLayout的使用/" class="next">TabLayout的使用</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

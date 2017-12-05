@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>RxJava操作符：创建操作 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">RxJava操作符：创建操作</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">RxJava操作符：创建操作</h1><div class="post-meta">Mar 17, 2017</div><div class="post-content"><h1 id="Create"><a href="#Create" class="headerlink" title="Create"></a>Create</h1><h2 id="——使用一个函数从头开始创建一个Observable"><a href="#——使用一个函数从头开始创建一个Observable" class="headerlink" title="——使用一个函数从头开始创建一个Observable"></a>——使用一个函数从头开始创建一个Observable</h2><a id="more"></a>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/create.c.png" alt="Create操作符"></p>
+<p>代码：</p>
+<pre><code>Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
+        @Override
+        public void call(Subscriber&lt;? super String&gt; subscriber) {
+            if (!subscriber.isUnsubscribed()) {//判断观察者的状态，如果没有订阅则不发送数据
+                subscriber.onNext(&quot;created 操作符1&quot;);
+                subscriber.onNext(&quot;created 操作符2&quot;);
+                subscriber.onNext(&quot;created 操作符3&quot;);
+                subscriber.onNext(&quot;created 操作符4&quot;);
+                subscriber.onCompleted();
+            }
+
+        }
+    }).subscribe(new Subscriber&lt;String&gt;() {
+        @Override
+        public void onCompleted() {
+            Log.d(TAG, &quot;onCompleted&quot;);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            Log.d(TAG, &quot;onError:&quot; + e.toString());
+        }
+
+        @Override
+        public void onNext(String s) {
+            Log.d(TAG, s);
+
+        }
+    });
+</code></pre><p>输出结果：</p>
+<pre><code>03-17 23:46:43.137 12009-12009/com.io.github.hjianfei.demo D/onResponse: created 操作符1
+03-17 23:46:43.137 12009-12009/com.io.github.hjianfei.demo D/onResponse: created 操作符2
+03-17 23:46:43.137 12009-12009/com.io.github.hjianfei.demo D/onResponse: created 操作符3
+03-17 23:46:43.137 12009-12009/com.io.github.hjianfei.demo D/onResponse: created 操作符4
+03-17 23:46:43.137 12009-12009/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><h1 id="From"><a href="#From" class="headerlink" title="From "></a>From </h1><h2 id="——将其它种类的对象和数据类型转换为Observable"><a href="#——将其它种类的对象和数据类型转换为Observable" class="headerlink" title="——将其它种类的对象和数据类型转换为Observable"></a>——将其它种类的对象和数据类型转换为Observable</h2><p><img src="http://okzvc1hu4.bkt.clouddn.com/from.png" alt="From操作符"></p>
+<p>代码：</p>
+<pre><code>String from[] = {&quot;From操作符1&quot;, &quot;From操作符2&quot;, &quot;From操作符3&quot;, &quot;From操作符4&quot;};
+    Observable.from(from)
+            .subscribe(new Subscriber&lt;String&gt;() {
+                @Override
+                public void onCompleted() {
+                    Log.d(TAG, &quot;onCompleted&quot;);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.d(TAG, &quot;onError:&quot; + e.toString());
+
+                }
+
+                @Override
+                public void onNext(String s) {
+                    Log.d(TAG, s);
+
+                }
+            });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:02:39.591 28131-28131/com.io.github.hjianfei.demo D/onResponse: From操作符1
+03-18 00:02:39.591 28131-28131/com.io.github.hjianfei.demo D/onResponse: From操作符2
+03-18 00:02:39.591 28131-28131/com.io.github.hjianfei.demo D/onResponse: From操作符3
+03-18 00:02:39.591 28131-28131/com.io.github.hjianfei.demo D/onResponse: From操作符4
+03-18 00:02:39.591 28131-28131/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><h1 id="Interval"><a href="#Interval" class="headerlink" title="Interval"></a>Interval</h1><h2 id="——创建一个按固定时间间隔发射整数序列的Observable"><a href="#——创建一个按固定时间间隔发射整数序列的Observable" class="headerlink" title="——创建一个按固定时间间隔发射整数序列的Observable"></a>——创建一个按固定时间间隔发射整数序列的Observable</h2><p><img src="http://okzvc1hu4.bkt.clouddn.com/interval.png" alt="Interval"></p>
+<p>Interval操作符返回一个Observable，它按固定的时间间隔发射一个无限递增的整数序列。它接受一个表示时间间隔的参数和一个表示时间单位的参数。</p>
+<pre><code>interval(long,TimeUnit))
+interval(long,TimeUnit,Scheduler))
+</code></pre><p>代码：</p>
+<pre><code>Observable.interval(5, TimeUnit.SECONDS)
+                .subscribe(new Subscriber&lt;Long&gt;() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, &quot;onCompleted&quot;);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, &quot;onError:&quot; + e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Long aLong) {
+                        Log.d(TAG, aLong+&quot;&quot;);
+
+                    }
+                });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:08:58.024 6346-6651/com.io.github.hjianfei.demo D/onResponse: 0
+03-18 00:09:03.023 6346-6651/com.io.github.hjianfei.demo D/onResponse: 1
+03-18 00:09:08.024 6346-6651/com.io.github.hjianfei.demo D/onResponse: 2
+03-18 00:09:13.024 6346-6651/com.io.github.hjianfei.demo D/onResponse: 3
+03-18 00:09:18.024 6346-6651/com.io.github.hjianfei.demo D/onResponse: 4
+03-18 00:09:23.025 6346-6651/com.io.github.hjianfei.demo D/onResponse: 5
+......
+......
+</code></pre><h1 id="Just"><a href="#Just" class="headerlink" title="Just"></a>Just</h1><h2 id="——创建一个发射指定值的Observable"><a href="#——创建一个发射指定值的Observable" class="headerlink" title="——创建一个发射指定值的Observable"></a>——创建一个发射指定值的Observable</h2><p>Just将单个数据转换为发射那个数据的Observable。</p>
+<p>Just类似于From，但是From会将数组或Iterable的数据取出然后逐个发射，而Just只是简单的原样发射，将数组或Iterable当做单个数据。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/just.png" alt="Just操作符"></p>
+<p>代码：</p>
+<pre><code>Observable.just(&quot;Just操作符1&quot;, &quot;Just操作符2&quot;, &quot;Just操作符3&quot;, &quot;Just操作符4&quot;)
+        .subscribe(new Subscriber&lt;String&gt;() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, &quot;onCompleted&quot;);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, &quot;onError:&quot; + e.toString());
+
+            }
+
+            @Override
+            public void onNext(String just) {
+                Log.d(TAG, just);
+
+            }
+        });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:16:30.458 16301-16301/com.io.github.hjianfei.demo D/onResponse: Just操作符1
+03-18 00:16:30.458 16301-16301/com.io.github.hjianfei.demo D/onResponse: Just操作符2
+03-18 00:16:30.458 16301-16301/com.io.github.hjianfei.demo D/onResponse: Just操作符3
+03-18 00:16:30.458 16301-16301/com.io.github.hjianfei.demo D/onResponse: Just操作符4
+03-18 00:16:30.458 16301-16301/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><h1 id="Range"><a href="#Range" class="headerlink" title="Range"></a>Range</h1><h2 id="——创建一个发射特定整数序列的Observable"><a href="#——创建一个发射特定整数序列的Observable" class="headerlink" title="——创建一个发射特定整数序列的Observable"></a>——创建一个发射特定整数序列的Observable</h2><p>Range操作符发射一个范围内的有序整数序列，你可以指定范围的起始和长度。</p>
+<p>RxJava将这个操作符实现为range函数，它接受两个参数，一个是范围的起始值，一个是范围的数据的数目。如果你将第二个参数设为0，将导致Observable不发射任何数据（如果设置为负数，会抛异常）。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/range.png" alt="Range操作符"></p>
+<p>代码：</p>
+<pre><code>Observable.range(1, 5)
+        .subscribe(new Subscriber&lt;Integer&gt;() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, &quot;onCompleted&quot;);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, &quot;onError:&quot; + e.toString());
+            }
+
+            @Override
+            public void onNext(Integer integer) {
+                Log.d(TAG, integer + &quot;&quot;);
+
+            }
+        });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: 1
+03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: 2
+03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: 3
+03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: 4
+03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: 5
+03-18 00:19:55.669 22020-22020/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><h1 id="Repeat"><a href="#Repeat" class="headerlink" title="Repeat"></a>Repeat</h1><h2 id="——创建一个发射特定数据重复多次的Observable"><a href="#——创建一个发射特定数据重复多次的Observable" class="headerlink" title="——创建一个发射特定数据重复多次的Observable"></a>——创建一个发射特定数据重复多次的Observable</h2><p>Repeat重复地发射数据。某些实现允许你重复的发射某个数据序列，还有一些允许你限制重复的次数。</p>
+<p>RxJava将这个操作符实现为repeat方法。它不是创建一个Observable，而是重复发射原始Observable的数据序列，这个序列或者是无限的，或者通过repeat(n)指定重复次数。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/repeat.png" alt="Repeat操作符"></p>
+<p>代码：</p>
+<pre><code>Observable.just(&quot;Repeat操作符1&quot;, &quot;Repeat操作符2&quot;, &quot;Repeat操作符3&quot;)
+        .repeat(2)
+        .subscribe(new Subscriber&lt;String&gt;() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, &quot;onCompleted&quot;);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, &quot;onError:&quot; + e.toString());
+
+            }
+
+            @Override
+            public void onNext(String just) {
+                Log.d(TAG, just);
+
+            }
+        });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:24:50.660 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符1
+03-18 00:24:50.661 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符2
+03-18 00:24:50.661 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符3
+03-18 00:24:50.665 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符1
+03-18 00:24:50.665 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符2
+03-18 00:24:50.665 28474-28474/com.io.github.hjianfei.demo D/onResponse: Repeat操作符3
+03-18 00:24:50.665 28474-28474/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><h1 id="Timer"><a href="#Timer" class="headerlink" title="Timer"></a>Timer</h1><h2 id="——创建一个Observable，它在一个给定的延迟后发射一个特殊的值。"><a href="#——创建一个Observable，它在一个给定的延迟后发射一个特殊的值。" class="headerlink" title="——创建一个Observable，它在一个给定的延迟后发射一个特殊的值。"></a>——创建一个Observable，它在一个给定的延迟后发射一个特殊的值。</h2><p>Timer操作符创建一个在给定的时间段之后返回一个特殊值的Observable。</p>
+<p>RxJava将这个操作符实现为timer函数。</p>
+<p>timer返回一个Observable，它在延迟一段给定的时间后发射一个简单的数字0。</p>
+<p><img src="http://okzvc1hu4.bkt.clouddn.com/timer.png" alt="Timer操作符"></p>
+<p>代码：</p>
+<pre><code>Observable.timer(2, java.util.concurrent.TimeUnit.SECONDS)
+        .subscribe(new Subscriber&lt;Long&gt;() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, &quot;onCompleted&quot;);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, &quot;onError:&quot; + e.toString());
+            }
+
+            @Override
+            public void onNext(Long aLong) {
+                Log.d(TAG, aLong + &quot;&quot;);
+
+            }
+        });
+</code></pre><p>结果：</p>
+<pre><code>03-18 00:29:42.656 3065-3533/com.io.github.hjianfei.demo D/onResponse: 0
+03-18 00:29:42.656 3065-3533/com.io.github.hjianfei.demo D/onResponse: onCompleted
+</code></pre><p>还有更多的操作符请查看 <a href="https://github.com/ReactiveX/rxjava/wiki" target="_blank" rel="noopener">RXJava官方文档</a></p>
+</div><div class="tags"></div><div class="post-nav"><a href="/2017/03/18/RxJava操作符：变换操作/" class="pre">RxJava操作符：变换操作</a><a href="/2017/03/13/Git基本命令整理/" class="next">Git基本命令整理</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Git基本命令整理 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Git基本命令整理</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Git基本命令整理</h1><div class="post-meta">Mar 13, 2017</div><div class="post-content"><p>Git是一个开源的分布式版本控制系统，可以有效、高速的处理从很小到非常大的项目版本管理。Git 是 Linus Torvalds 为了帮助管理 Linux 内核开发而开发的一个开放源码的版本控制软件。<br><a id="more"></a></p>
+<ol>
+<li>git –version 查看Git的版本</li>
+<li>git config –list 查看Git的配置信息</li>
+<li>git config –global user.name “Your Name” 设置用户名</li>
+<li>git config –global unset user.name “Your Name” 删除用户名</li>
+<li>git config –global user.email “Your Email” 设置用户邮箱</li>
+<li>git config –global unset user.email “Your Email” 删除邮箱</li>
+<li>git init 设置版本仓库</li>
+<li>git add –add 或者 git add .  添加所有更改的文件</li>
+<li>git add <code>&lt;</code>file<code>&gt;</code>  添加某一个文件</li>
+<li>git commit -m “commit message” 添加更改信息，必须添加，不然报错</li>
+<li>git commit –amend -m “commit again” 追加修改</li>
+<li>git status 查看git当前状态</li>
+<li>git diff <code>&lt;</code>file<code>&gt;</code> 查看file 到底修改了什么内容</li>
+<li>git log 查看最近的提交日志信息</li>
+<li>git log –pretty=oneline 单行显示提交日志信息</li>
+<li>git reflog 查看命令的历史信息</li>
+<li>git checkout –<code>&lt;</code>file<code>&gt;</code>利用版本库中的版本替换工作区中的文件。功能有2：撤销文件修改，分两 种情况：撤销工作区中的修改（没有使用git add命令添加到暂存区）撤销暂存区中的修改（添加到了暂存区又做了修改）找回删除的文件工作区中文件误删了，可以通过此命令从版本库中找回</li>
+<li>git reset HEAD <code>&lt;</code>file<code>&gt;</code> 撤销add，回到工作区</li>
+<li>git rm <code>&lt;</code>file<code>&gt;</code> 删除文件</li>
+<li>git remote add origin “Your URL” 将本地版本库关联到github远程库上</li>
+<li>git oush -u origin master 第一次推送的时候要加上 -u 参数，可以将本地版本库的master分支与远程库的master分支关联，下次提交就不需要加 -u 参数</li>
+<li>ssh-keygen -t rsa -C “Your Email” 创建SSH Key</li>
+<li>git checkout -b dev 创建 dev 分支并切换到dev分支，相当于git branch dev 、git checkout dev 两个命令的使用</li>
+<li>git branch 查看当前分支</li>
+<li>git branch -d dev 删除dev分支</li>
+<li>git log –graph –pretty=oneline –abbrev-commit 查看分支合并图</li>
+<li>git  merge dev 合并指定分支到当前分支</li>
+<li>git merge –no-ff -m “merge with no-ff” dev 禁用[Fast forward],也就是保留分支的相关信息</li>
+<li>git stash 将工作区现场储存起来，等以后恢复继续工作，通常用于处理更为着急的任务，例如：bug</li>
+<li>git stash list 查看保存的工作现场</li>
+<li>git stash apply 恢复工作现场</li>
+<li>git stash drop 删除stash 内容</li>
+<li>git stash pop 恢复的同时直接删除stash 内容</li>
+<li>git branch -D dev 强制删除dev分支</li>
+<li>git remote 查看远程库的信息</li>
+<li>git remote -v 查看远程库的详情信息</li>
+<li>git clone “URL” 将远程库克隆到本地，默认只能看到master分支</li>
+<li>git checkout -b dev origin/dev 创建远程dev分支到本地</li>
+<li>git pull 将远程分支的最新内容抓取下来</li>
+<li>git branch –set-upstream dev origin/dev将本地dev分支与远程dev分支之间建立链接。多人协作工作模式首先，可以试图用git push origin branch-name推送自己的修改；如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并（如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch –set-upstream branch-name origin/branchname）;如果合并有冲突，则解决冲突，并在本地提交；没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功</li>
+<li>git tag v1.0 给当前分支打上标签</li>
+<li>git tag 查看所有的标签</li>
+<li>git show v1.0 查看标签的信息</li>
+<li>git tag -a v0.1 -m “version 0.1 released” commitID创建带有说明的标签，-a指定标签名，-m指定说明文字</li>
+<li>git tag -d v0.1 删除标签v0.1</li>
+<li>git push origin v1.0 推送标签1.0到远程</li>
+<li>git push origin –tags 推送所有的 标签到远程</li>
+<li>git push origin :refs/tags/v0.9 删除远程标签，但是前提是要先在本地删除对应标签</li>
+</ol>
+</div><div class="tags"></div><div class="post-nav"><a href="/2017/03/17/RxJava操作符：创建操作/" class="pre">RxJava操作符：创建操作</a><a href="/2017/03/07/Markdown基本语法/" class="next">Markdown基本语法</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
