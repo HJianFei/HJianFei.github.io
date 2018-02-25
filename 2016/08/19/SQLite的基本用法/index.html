@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>SQLite的基本用法 | HJianFei的博客</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">SQLite的基本用法</h1><a id="logo" href="/.">HJianFei的博客</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">SQLite的基本用法</h1><div class="post-meta">Aug 19, 2016</div><div class="post-content"><h2 id="SQLiteOpenHelper-常用方法"><a href="#SQLiteOpenHelper-常用方法" class="headerlink" title="SQLiteOpenHelper 常用方法"></a>SQLiteOpenHelper 常用方法</h2><ul>
+<li>void onCreate(SQLiteDatabase db)： 在首次生成数据库时才会被调用，在onCreate()方法里可以生成数据库表结构等相关初始化操作。</li>
+</ul>
+<ul>
+<li>void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)： 在数据库的版本发生变化时会被调用，一般在软件升级时才需改变版本号，或者说由于需求的变化导致不得不对数据库相关属性(字段)，那么这时候可以在这里面做相关操作。</li>
+</ul>
+<h2 id="SQLiteDatabase-常用方法"><a href="#SQLiteDatabase-常用方法" class="headerlink" title="SQLiteDatabase 常用方法"></a>SQLiteDatabase 常用方法</h2><h4 id="获取操作数据库的SQLiteDatabase实例："><a href="#获取操作数据库的SQLiteDatabase实例：" class="headerlink" title="获取操作数据库的SQLiteDatabase实例："></a>获取操作数据库的SQLiteDatabase实例：</h4><ul>
+<li>getReadableDatabase()： 先以读写方式打开数据库，如果数据库的磁盘空间满了，就会打开失败，当打开失败后会继续尝试以只读方式打开数据库。如果该问题成功解决，则只读数据库对象就会关闭，然后返回一个可读写的数据库对象。</li>
+</ul>
+<ul>
+<li>getWritableDatabase()：  以读写方式打开数据库，一旦数据库的磁盘空间满了，数据库就只能读而不能写。</li>
+</ul>
+<p>####新增，插入</p>
+<ul>
+<li>long insert(String table, String nullColumnHack, ContentValues values)</li>
+</ul>
+<ul>
+<li>long insertOrThrow(String table, String nullColumnHack, ContentValues values)</li>
+</ul>
+<ul>
+<li>long insertWithOnConflict(String table, String nullColumnHack, ContentValues initialValues, int conflictAlgorithm)</li>
+</ul>
+<p>#######参数相关含义，如下：<br>    table：要插入数据的表的名称；<br>    values：一个ContentValues对象，类似一个map.通过键值对的形式存储值；<br>    conflictAlgon：冲突解决方案。例如当数据表主键的唯一性检测出错的时候，就会按照该值设定的值进行处理；<br>    nullColumnHack：当values参数为空或者里面没有内容的时候，我们insert是会失败的（底层数据库不允许插入一个空行），为了防止这种情况，我们要在这里指定一个 列名，到时候如果发现将要插入的行为空行时，就会将你指定的这个列名的值设为null，然后再向数据库中插入</p>
+<p>######方法返回值含义：<br>    方法返回当前插入的索引。</p>
+<p>#####删除</p>
+<ul>
+<li>int delete(String table, String whereClause, String[] whereArgs)<br>#######参数解释如下：<br>  whereClause：条件，为一个字符串；如果多个条件中间使用 and 隔开；<br>  whereArgs：字符串数组，和whereClause配合使用。与条件匹配的值。<br>#####修改</li>
+<li>int update(String table, ContentValues values, String whereClause, String[] whereArgs)</li>
+<li></li>
+<li><p>int updateWithOnConflict(String table, ContentValues values,String whereClause, String[] whereArgs, int conflictAlgorithm) </p>
+<pre><code>我们普遍使用的是update()方法，但是它内部会调用updateWithOnConflict()去实现更新操作，有兴趣的可以了解了解
+</code></pre></li>
+</ul>
+<p>#####查询</p>
+<ul>
+<li>Cursor query(String table, String[] columns, String selection,String[] selectionArgs, String groupBy, String having,String orderBy)；</li>
+</ul>
+<ul>
+<li>Cursor query(boolean distinct, String table, String[] columns,String selection, String[] selectionArgs, String groupBy,String having, String orderBy, String limit)；</li>
+</ul>
+<ul>
+<li>Cursor query(boolean distinct, String table, String[] columns,String selection, String[] selectionArgs, String groupBy,String having, String orderBy, String limit, CancellationSignal cancellationSignal)；</li>
+</ul>
+<ul>
+<li>Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having,String orderBy, String limit)；</li>
+</ul>
+<ul>
+<li>Cursor rawQuery(String sql, String[] selectionArgs)；</li>
+</ul>
+<ul>
+<li>Cursor rawQuery(String sql, String[] selectionArgs, CancellationSignal cancellationSignal)；</li>
+</ul>
+<ul>
+<li>Cursor rawQueryWithFactory( CursorFactory cursorFactory, String sql, String[] selectionArgs,String editTable)； </li>
+</ul>
+<pre><code>查询最终依然调用了rawQueryWithFactory()，主要的操作还是在这里面实现。其中相关的参数大家可以从字面上理解。
+
+官方在查询中同样也提供了SQL语句方式，大家注意看上面，下面简单介绍下execSQL()：
+
+execSQL(String sql, Object[] bindArgs)：方法的第一个参数为SQL语句，第二个参数为SQL语句中占位符参数的值，参数值在数组中的顺序要和占位符的位置对应。
+举个小例子：
+//省略初始化操作
+方法一：指定列名
+db.execSQL(&quot;insert into stu(stu_name,stu_age,stu_address) values(?,?,?)&quot;, new Object[]{&quot;HJF&quot;,21,&quot;目前在广东&quot;});
+方法二：不指定列名
+db.execSQL(&quot;insert into stu values(?,?,?)&quot;, new Object[]{&quot;HJF&quot;,21,&quot;目前在广东&quot;});
+//省略关闭操作
+</code></pre><h2 id="常用-SQL-语句-（SQL-语句对大小写不敏感）"><a href="#常用-SQL-语句-（SQL-语句对大小写不敏感）" class="headerlink" title="常用 SQL 语句 （SQL 语句对大小写不敏感）"></a>常用 SQL 语句 （SQL 语句对大小写不敏感）</h2><ul>
+<li><p>insert — 插入</p>
+<p>  写法一： insert into table_name values (值1, 值2,….)</p>
+<p>  写法二： insert into table_name values (列1, 列2,…) values(值1, 值2,….)（需注意的是，值需要和列一一对应）</p>
+</li>
+<li><p>delete — 删除</p>
+<p>  删除符合条件数据：delete from table_name where 列名称=值</p>
+<p>  删除表中所有数据：delete from table_name</p>
+</li>
+<li><p>update — 修改</p>
+<p>  修改一列：update table_name set 列名称 = 新值 where 列名称 = 某值</p>
+<p>  修改多列：update table_name set 列名称1 = 新值1，列名称2 = 新值2 where 列名称 = 某值</p>
+</li>
+<li><p>select — 查询</p>
+<p>  查询某表中所有数据：select * from table_name</p>
+<p>  查询某表中指定列数据：select 列名称 from table_name</p>
+<p>  查询去除重复数据：select distinct 列名称 from table_name</p>
+</li>
+<li><p>order by — 排序</p>
+<p>  order by 语句用于根据指定的列对结果集进行排序；</p>
+<p>  order by 语句默认按照升序对记录进行排序，如果希望按照降序对记录进行排序，可以使用 desc 关键字。 </p>
+</li>
+</ul>
+<h2 id="常用-SQL-函数"><a href="#常用-SQL-函数" class="headerlink" title="常用 SQL 函数"></a>常用 SQL 函数</h2><ul>
+<li><p>avg() — 返回数值列的平均值（null 值不包括在计算中）</p>
+<p>  select avg(column_name) from table_name</p>
+</li>
+<li><p>count() — 返回指定列的值的数目（null 不计入）</p>
+<p>  表中的记录数：select count(*) from table_name</p>
+<p>  返回指定列的值的数目：select count(column_name) from table_name</p>
+</li>
+<li><p>max() — 返回一列中的最大值（null 值不包括在计算中）</p>
+<p>  select max(column_name) from table_name</p>
+</li>
+<li><p>min() — 返回一列中的最小值（null 值不包括在计算中）</p>
+<p>  select min(column_name) from table_name</p>
+</li>
+<li><p>sum() — 返回数值列的总数</p>
+<p>  select sum(column_name) from table_name</p>
+</li>
+<li><p>first() — 返回指定的字段中第一个记录的值</p>
+<p>  select first(column_name) from table_name</p>
+</li>
+<li><p>last() — 返回指定的字段中最后一个记录的值</p>
+</li>
+</ul>
+<pre><code>select last(column_name) from table_name
+</code></pre><h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>#####创建DBHelper帮助类<br>    package cn.hlq.sqlitestudy.db;</p>
+<pre><code>import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+/**
+ * Created by HLQ on 2017/4/7
+ * 创建数据库(初始化)帮助类
+ * 现在创建一个学生表，表中含有编号，姓名，年龄，地址
+ */
+public class DBHelper extends SQLiteOpenHelper {
+
+/**
+ * 数据库名称
+ */
+private static final String DATABASE_NAME=&quot;sqlite_study.db&quot;;
+/**
+ * 数据库版本号
+ */
+private static final int DATABASE_VERSION=1;
+
+/**
+ * 初始化设置数据库名称，数据库版本号
+ * @param context
+ */
+public DBHelper(Context context) {
+    super(context, DATABASE_NAME, null, DATABASE_VERSION);
+}
+
+/**
+ * 键明其意，在创建的时候会调用，而且只会调用一次
+ * @param db
+ */
+@Override
+public void onCreate(SQLiteDatabase db) {
+    // 创建学生表
+    db.execSQL(SQLManager.SQL_CREATE_TABLE_STU);
+}
+
+/**
+ * 数据库有更新时调用
+ * @param db
+ * @param oldVersion
+ * @param newVersion
+ */
+@Override
+public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+}
+}
+</code></pre><p>#####创建SQLManager管理类</p>
+<pre><code>package cn.hlq.sqlitestudy.db;
+
+/**
+ * Created by HLQ on 2017/4/7
+ * 这里为了避免累赘，简单附上创建学生表的SQL语句，具体详情大家可直接查看Demo源码
+ */
+
+public class SQLManager {
+
+/**
+ * 创建学生表
+ */
+public static final String SQL_CREATE_TABLE_STU=&quot;create table if not exists stu (stu_id integer primary key autoincrement,stu_name varchar(15),stu_age integer,stu_address varchar(50))&quot;;
+
+}
+</code></pre><p>#####创建DBManager管理类，实现CRUD</p>
+<pre><code>package cn.hlq.sqlitestudy.db;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.hlq.sqlitestudy.entity.Student;
+
+/**
+ * Created by HLQ on 2017/4/7
+ */
+
+public class DBManager {
+
+    private Context context;
+       private DBHelper helper;
+       private SQLiteDatabase db;
+
+/**
+ * 构造方法初始化
+ *
+ * @param context
+ */
+public DBManager(Context context) {
+    this.context = context;
+    this.helper = new DBHelper(context);
+    this.db = helper.getWritableDatabase();
+}
+
+/**
+ * 新增一条数据
+ *
+ * @param stu
+ * @return
+ */
+public long insertDB(Student stu) {
+    ContentValues values = new ContentValues();
+    values.put(&quot;stu_name&quot;, stu.getStuName());
+    values.put(&quot;stu_age&quot;, stu.getStuAge());
+    values.put(&quot;stu_address&quot;, stu.getStuAddress());
+    long rowsNum = 0;
+    try {
+        rowsNum = db.insert(&quot;stu&quot;, null, values);
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e(&quot;HLQ_Struggle&quot;, &quot;insert error:&quot; + e.getMessage());
+    } finally {
+        if (db != null) {
+            db.close();
+        }
+    }
+    return rowsNum;
+}
+
+/**
+ * 删除单条数据
+ *
+ * @param stuName
+ * @return
+ */
+public int deleteDB(String stuName) {
+    int rowsNum = 0;
+    try {
+        rowsNum = db.delete(&quot;stu&quot;, &quot;stu_name=?&quot;, new String[]{stuName});
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e(&quot;HLQ_Struggle&quot;, &quot;delete error:&quot; + e.getMessage());
+    } finally {
+        if (db != null) {
+            db.close();
+        }
+    }
+    return rowsNum;
+}
+
+/**
+ * 删除多条数据
+ *
+ * @param stuName
+ * @param stuAge
+ * @return
+ */
+public int deleteDBForWhere(String stuName, int stuAge) {
+    int rowsNum = 0;
+    try {
+        rowsNum = db.delete(&quot;stu&quot;, &quot;stu_name=? and stu_age=?&quot;, new String[]{stuName, stuAge + &quot;&quot;});
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e(&quot;HLQ_Struggle&quot;, &quot;delete more where error:&quot; + e.getMessage());
+    } finally {
+        if (db != null) {
+            db.close();
+        }
+    }
+    return rowsNum;
+}
+
+/**
+ * 根据姓名修改
+ *
+ * @param stuName
+ * @return
+ */
+public int updateDB(String stuName) {
+    ContentValues values = new ContentValues();
+    values.put(&quot;stu_name&quot;, &quot;Test&quot;);
+    int rowsNum = 0;
+    try {
+        rowsNum = db.update(&quot;stu&quot;, values, &quot;stu_name=?&quot;, new String[]{stuName});
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e(&quot;HLQ_Struggle&quot;, &quot;update error:&quot; + e.getMessage());
+    } finally {
+        if (db != null) {
+            db.close();
+        }
+    }
+    return rowsNum;
+}
+
+/**
+ * 查询所有数据
+ *
+ * @return
+ */
+public List&lt;Student&gt; queryStu() {
+    List&lt;Student&gt; stuList = new ArrayList&lt;&gt;();
+    Cursor cursor = null;
+    try {
+        cursor = db.query(&quot;stu&quot;, null, null, null, null, null, null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Student stu = new Student();
+                stu.setStuName(cursor.getString(cursor.getColumnIndex(&quot;stu_name&quot;)));
+                stu.setStuAge(cursor.getInt(cursor.getColumnIndex(&quot;stu_age&quot;)));
+                stu.setStuAddress(cursor.getString(cursor.getColumnIndex(&quot;stu_address&quot;)));
+                stuList.add(stu);
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e(&quot;HLQ_Struggle&quot;, &quot;query error:&quot; + e.getMessage());
+    } finally {
+        if (cursor != null) {
+            cursor.close();
+        }
+        if (db != null) {
+            db.close();
+        }
+    }
+    return stuList;
+}
+</code></pre><p>}</p>
+</div><div class="tags"><a href="/tags/SQLite、数据库/">SQLite、数据库</a></div><div class="post-nav"><a href="/2016/09/15/REST-架构遵循了-CRUD-原则/" class="pre">REST 架构遵循了 CRUD 原则</a><a href="/2016/08/18/SQLite数据库的增删改查基本操作/" class="next">SQLite数据库的增删改查基本操作</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android-layout-gravity、android-gravity/" style="font-size: 15px;">android:layout_gravity、android:gravity</a> <a href="/tags/Activity启动模式/" style="font-size: 15px;">Activity启动模式</a> <a href="/tags/SQLite、数据库/" style="font-size: 15px;">SQLite、数据库</a> <a href="/tags/Android-5-0新特性、Snackbar、Toast/" style="font-size: 15px;">Android 5.0新特性、Snackbar、Toast</a> <a href="/tags/Json、Gson、数据解析/" style="font-size: 15px;">Json、Gson、数据解析</a> <a href="/tags/gson、json、数据解析/" style="font-size: 15px;">gson、json、数据解析</a> <a href="/tags/Android-5-0新特性、TextInputLayout/" style="font-size: 15px;">Android 5.0新特性、TextInputLayout</a> <a href="/tags/Android-5-0新特性、TabLayout/" style="font-size: 15px;">Android 5.0新特性、TabLayout</a> <a href="/tags/排序算法、冒泡排序/" style="font-size: 15px;">排序算法、冒泡排序</a> <a href="/tags/排序算法、选择排序/" style="font-size: 15px;">排序算法、选择排序</a> <a href="/tags/排序算法、插入排序/" style="font-size: 15px;">排序算法、插入排序</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之插入排序/">排序算法之插入排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之选择排序/">排序算法之选择排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/21/排序算法之冒泡排序/">排序算法之冒泡排序</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/03/Android常用工具类/">Android常用工具类</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/RxJava操作符：变换操作/">RxJava操作符：变换操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/17/RxJava操作符：创建操作/">RxJava操作符：创建操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/Git基本命令整理/">Git基本命令整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/07/Markdown基本语法/">Markdown基本语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/03/EventBus 3.0 的基本使用/">EventBus 3.0 的基本使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Gson的基本使用三/">Gson的基本使用三</a></li></ul></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">HJianFei的博客.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
